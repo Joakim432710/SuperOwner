@@ -1,5 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using System;
+using System.IO;
+using System.Reflection;
 
 namespace SuperOwner
 {
@@ -18,10 +20,12 @@ namespace SuperOwner
         public int TexCoordLocation { get; set; }
         public int ColorLocation { get; set; }
 
-        public Shader (ref string vs, ref string ps)
+        private static readonly string WorkingDirectory = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Shaders");
+
+        public Shader(string vertexShader, string pixelShader)
         {
-            VertexSource = vs;
-            PixelSource = ps;
+            VertexSource = File.ReadAllText(Path.Combine(WorkingDirectory, vertexShader + ".vs"));
+            PixelSource = File.ReadAllText(Path.Combine(WorkingDirectory, pixelShader + ".ps"));
             Build();
         }
 

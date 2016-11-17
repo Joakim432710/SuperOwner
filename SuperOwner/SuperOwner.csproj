@@ -61,10 +61,10 @@
     <None Include="App.config" />
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
-    <None Include="PixelShader.ps">
+    <None Include="Shaders\PixelShader.ps">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="VertexShader.vs">
+    <None Include="Shaders\VertexShader.vs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -77,12 +77,19 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Texture.cs" />
     <Compile Include="VertexFloatBuffer.cs" />
     <Compile Include="VertexFormat.cs" />
     <Compile Include="EntryPoint.cs" />
     <Compile Include="GameConstants.cs" />
     <Compile Include="MainWindow.cs" />
     <Compile Include="Shader.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Assets\Kitty.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

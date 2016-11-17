@@ -18,6 +18,8 @@ namespace SuperOwner
         private Shader Shader;
         private VertexFloatBuffer Buffer;
 
+        private Texture Texture;
+
         public MainWindow() 
             : base(GameConstants.StartupWidth, GameConstants.StartupHeight, 
                   GraphicsMode.Default, GameConstants.StartupTitle, 
@@ -33,6 +35,8 @@ namespace SuperOwner
 
             GL.ClearColor(0.392f, 0.584f, 0.929f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Texture2D);
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
             #region OpenGL Version Printing
             int major, minor;
@@ -48,19 +52,17 @@ namespace SuperOwner
             ModelViewMatrix = new Matrix4();
 
             CameraPosition = new Vector3(0.5f, 0.5f, 0.0f);
+            Shader = new Shader("VertexShader", "PixelShader");
 
-            var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            var vertexSrc = File.ReadAllText(Path.Combine(directory, "VertexShader.vs"));
-            var pixelSrc = File.ReadAllText(Path.Combine(directory, "PixelShader.ps"));
-            Shader = new Shader(ref vertexSrc, ref pixelSrc);
-
-            Buffer = new VertexFloatBuffer(VertexFormat.XYZ_COLOR, 3);
-            Buffer.AddVertex(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.9f, 1.0f);
-            Buffer.AddVertex(0.5f, 1.0f, 0.0f, 0.0f, 0.9f, 0.0f, 1.0f);
-            Buffer.AddVertex(1.0f, 0.0f, 0.0f, 0.9f, 0.0f, 0.0f, 1.0f);
+            Buffer = new VertexFloatBuffer(VertexFormat.XYZ_UV, 6) {DrawMode = BeginMode.Quads};
+            Buffer.AddVertex(0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+            Buffer.AddVertex(1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+            Buffer.AddVertex(1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+            Buffer.AddVertex(0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
             Buffer.IndexFromLength();
+
             Buffer.Load();
+            Texture = new Texture("Kitty.png");
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -72,7 +74,6 @@ namespace SuperOwner
             Matrix4 MVP = ModelViewMatrix * WorldMatrix * ProjectionMatrix;
 
             GL.UseProgram(Shader.ProgramId);
-
             int mvp_loc = GL.GetUniformLocation(Shader.ProgramId, "mvp_matrix");
             GL.UniformMatrix4(mvp_loc, false, ref MVP);
             GL.UseProgram(0);
@@ -86,6 +87,7 @@ namespace SuperOwner
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.UseProgram(Shader.ProgramId);
+            GL.BindTexture(TextureTarget.Texture2D, Texture.TextureId);
             Buffer.Bind(Shader);
             GL.UseProgram(0);
 
