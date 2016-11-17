@@ -16,14 +16,14 @@ namespace SuperOwner
 
         private Vector3 CameraPosition;
         private Shader Shader;
-        private VertexFloatBuffer Buffer;
+        private Image Image;
+        private Image Background;
+        //private VertexFloatBuffer Buffer;
 
-        private Texture Texture;
-
-        public MainWindow() 
-            : base(GameConstants.StartupWidth, GameConstants.StartupHeight, 
-                  GraphicsMode.Default, GameConstants.StartupTitle, 
-                  GameWindowFlags.Default, DisplayDevice.Default, 
+        public MainWindow()
+            : base(GameConstants.StartupWidth, GameConstants.StartupHeight,
+                  GraphicsMode.Default, GameConstants.StartupTitle,
+                  GameWindowFlags.Default, DisplayDevice.Default,
                   4, 0, GraphicsContextFlags.ForwardCompatible)
         {
 
@@ -53,30 +53,44 @@ namespace SuperOwner
 
             CameraPosition = new Vector3(0.5f, 0.5f, 0.0f);
             Shader = new Shader("VertexShader", "PixelShader");
+            var bg = new Texture("Background.png");
+            var img = new Texture("Kitty.png");
 
-            Buffer = new VertexFloatBuffer(VertexFormat.XYZ_UV, 6) {DrawMode = BeginMode.Quads};
+            /*Buffer = new VertexFloatBuffer(VertexFormat.XYZ_UV, 6) {DrawMode = BeginMode.Quads};
             Buffer.AddVertex(0.0f, 0.0f, 0.0f, 1.0f, 1.0f);
             Buffer.AddVertex(1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
             Buffer.AddVertex(1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
             Buffer.AddVertex(0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
             Buffer.IndexFromLength();
+            Buffer.Load();*/
 
-            Buffer.Load();
-            Texture = new Texture("Kitty.png");
+            Background = new Image(new Vector2(0.0f, 0.0f), new Vector2(1.0f, 1.0f), Shader, bg);
+            Image = new Image(new Vector2(0.0f, 0.7f), new Vector2(0.3f, 0.3f), Shader, img);
         }
 
+
+        private bool goRight = true;
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
 
             WorldMatrix = Matrix4.CreateTranslation(-CameraPosition);
-            ModelViewMatrix = Matrix4.CreateTranslation(0.0f, 0.0f, -2.0f);
-            Matrix4 MVP = ModelViewMatrix * WorldMatrix * ProjectionMatrix;
 
-            GL.UseProgram(Shader.ProgramId);
-            int mvp_loc = GL.GetUniformLocation(Shader.ProgramId, "mvp_matrix");
-            GL.UniformMatrix4(mvp_loc, false, ref MVP);
-            GL.UseProgram(0);
+            if (goRight)
+            {
+                if ((Image.Position.X + Image.Size.X) < 1.0f)
+                    Image.Position = new Vector2(Image.Position.X + (float)(e.Time * 0.20), Image.Position.Y);
+                else
+                    goRight = false;
+            }
+            else
+            {
+                if (Image.Position.X > 0.0f)
+                    Image.Position = new Vector2(Image.Position.X - (float)(e.Time * 0.20), Image.Position.Y);
+                else
+                    goRight = true;
+            }
+            //CameraPosition = new Vector3(CameraPosition.X - (float)(e.Time * 0.1), CameraPosition.Y, CameraPosition.Z);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -85,12 +99,8 @@ namespace SuperOwner
 
             GL.Viewport(0, 0, Width, Height);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            GL.UseProgram(Shader.ProgramId);
-            GL.BindTexture(TextureTarget.Texture2D, Texture.TextureId);
-            Buffer.Bind(Shader);
-            GL.UseProgram(0);
-
+            Image.Render(WorldMatrix * ProjectionMatrix);
+            Background.Render(WorldMatrix * ProjectionMatrix);
             SwapBuffers();
         }
     }

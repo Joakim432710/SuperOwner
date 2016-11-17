@@ -6,9 +6,16 @@ uniform sampler2D tex;
 in vec4 color;
 in vec2 texCoord;
 
+float rand(vec2 co)
+{
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 void main(void)
 {
 	//pixel_color = color;
 	//pixel_color = vec4(texCoord, 0.0, 0.0);
+
 	pixel_color = texture2D(tex, texCoord);
+	//pixel_color = vec4(1.0, rand(texCoord), rand(texCoord), rand(texCoord));
 }

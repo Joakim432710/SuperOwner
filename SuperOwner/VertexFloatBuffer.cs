@@ -308,6 +308,17 @@ namespace SuperOwner
             _vertexData[_vertexPosition++] = b;
             _vertexData[_vertexPosition++] = a;
         }
+        
+        public void AddVertex(float x, float y, float u, float v)
+        {
+            if (Format != VertexFormat.XY_UV)
+                throw new FormatException("vertex must be of the same format type as buffer");
+
+            _vertexData[_vertexPosition++] = x;
+            _vertexData[_vertexPosition++] = y;
+            _vertexData[_vertexPosition++] = u;
+            _vertexData[_vertexPosition++] = v;
+        }
 
         public void AddVertex(float x, float y, float z)
         {
@@ -395,5 +406,4 @@ namespace SuperOwner
             _vertexData[_vertexPosition++] = a;
         }
     }
-
 }
